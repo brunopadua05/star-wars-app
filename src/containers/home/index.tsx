@@ -1,32 +1,45 @@
-import { Button, Card, Input, Text } from '@ui-kitten/components';
+import { Button, Card, Input, Text, Layout } from '@ui-kitten/components';
 import React, { Component, } from 'react';
 import { inject, observer } from 'mobx-react';
 
 import HomeStore from '../../stores/home.store';
+import { ROUTES_NAMES } from '../../routes';
+import { ScrollView } from 'react-native-gesture-handler';
 import { StyleSheet } from 'react-native';
+
 
 interface Props {
     homeStore: HomeStore
+    navigation: any;
 }
 
 @inject('homeStore')
 @observer
 export default class Home extends Component<Props> {
+    async componentDidMount() {
+        const { getFilms } = this.props.homeStore;
+        await getFilms();
+    }
 
     render() {
-        const { etanol, gasolina, resultado, calculate, handleForm } = this.props.homeStore;
+        const { films } = this.props.homeStore;
 
-        return (<>
-            <Card >
-                <Text>Etanol:</Text>
-                <Input value={etanol.toString()} onChangeText={(etanol) => handleForm({ etanol })} />
-                <Text>Gasolina:</Text>
-                <Input value={gasolina.toString()} onChangeText={(gasolina) => handleForm({ gasolina })} />
-
-                <Button onPress={() => calculate()}>Calcular</Button>
-                <Text style={styles.paragraph}>{resultado}</Text>
-            </Card>
-        </>);
+        const navigateScreen = (id: number) => {
+            const { navigate } = this.props.navigation;
+            navigate(ROUTES_NAMES.Film, { id });
+        }
+    
+    return (<Layout style={{ flex: 1, backgroundColor: 'black' }}>
+      <ScrollView>
+        {films.map((film, index) => (
+          <Card onPress={() => navigateScreen(film.id)} key={index}>
+            <Text style={styles.title}>{film.title}</Text>
+            <Text>Episode {film.episode_id.toString()}</Text>
+          </Card>
+        ))}
+      </ScrollView>
+    </Layout>);
+        
     }
 }
 
@@ -37,6 +50,9 @@ const styles = StyleSheet.create({
         paddingTop: '10',
         padding: 8,
     },
+    title: {
+        fontSize: 20,
+      },
     paragraph: {
         margin: 24,
         fontSize: 18,
